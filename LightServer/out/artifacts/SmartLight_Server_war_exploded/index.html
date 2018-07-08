@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title></title>
+<link rel="stylesheet" href="css/style.css" />
+<script type="text/javascript" src="js/jquery-3.2.1.min.js"></script>
+<style type="text/css">
+body {
+	background-color: #121823;
+}
+
+#progress {
+	width: 40%;
+	background-color: #121823;
+	height: 30px;
+	border-radius: 6px;
+	margin: 0 auto;
+	margin-top: 20px;
+	box-shadow: 0 0 1px 1px rgba(0, 0, 0, 0.25), inset 0 1px
+		rgba(255, 255, 255, 0.1);
+}
+
+#progress-bar {
+	width: 0%;
+	background-color: wheat;
+	border-radius: 6px;
+	height: 100%;
+}
+</style>
+		<script type="text/javascript">
+		function changeLight(leval){
+				$.get("ChangeLightServlet?leval="+leval);
+				switch(leval){
+				case 1:
+					$("#progress-bar").css("width","20%");
+					break;
+				case 2:
+					$("#progress-bar").css("width","40%");
+					break;
+				case 3:
+					$("#progress-bar").css("width","60%");
+					break;
+				case 4:
+					$("#progress-bar").css("width","80%");
+					break;
+				case 5:
+					$("#progress-bar").css("width","100%");
+					break;
+			}
+			}
+
+		
+		
+			$(function(){
+				$("#light").click(function(){
+					if(this.checked){
+						//alert("开灯");
+						//向后台发起开灯请求
+						//1、向后台发起http请求，
+						//2、后台servlet对应的doGet/doPost方法接受到请求后，通过socket发送开灯/关灯命令
+						//jQuery.get(url, [data], [callback], [type])
+						$.get("CloseOrOpenServlet?flag=true",function(data){
+							//console.log(data);
+							if(data == "1"){
+								alert("开灯成功");
+							}else{
+								alert("开灯失败");
+							}
+						});
+					}else{
+						//alert("关灯");
+						//向后台发起开灯请求
+						$.get("CloseOrOpenServlet?flag=false",function(data){
+							//console.log(data);
+							if(data == "1"){
+								alert("关灯成功");
+							}else{
+								alert("关灯失败");
+							}
+						});
+					}
+				});
+			});
+		</script>
+</head>
+<body>
+	<div class="switch">
+		<input type="checkbox" name="lightCheck" id="light"> <label
+			for="lightCheck"><i></i></label><span></span>
+	</div>
+	<div id="controller" style="text-align: center;">
+		<button onclick="changeLight(1)">微弱</button>
+		<button onclick="changeLight(2)">护眼</button>
+		<button onclick="changeLight(3)">正常</button>
+		<button onclick="changeLight(4)">高亮</button>
+		<button onclick="changeLight(5)">超亮</button>
+
+	</div>
+	<div id="progress">
+		<div id="progress-bar"></div>
+	</div>
+
+	<div class="switch">
+		<input type="checkbox" name="lightCheck2" id="lightCheck2"> <label
+			for="lightCheck2"><i></i></label><span></span>
+	</div>
+</body>
+</html>
