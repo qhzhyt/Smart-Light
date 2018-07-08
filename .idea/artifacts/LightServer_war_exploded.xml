@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="LightServer:war exploded">
+    <output-path>$PROJECT_DIR$/out/artifacts/LightServer_war_exploded</output-path>
+    <root id="root">
+      <element id="javaee-facet-resources" facet="LightServer/web/Web2" />
+      <element id="javaee-facet-resources" facet="LightServer/web/Web" />
+    </root>
+  </artifact>
+</component>
