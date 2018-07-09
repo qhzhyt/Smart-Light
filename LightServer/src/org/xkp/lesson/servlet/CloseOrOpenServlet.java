@@ -38,14 +38,8 @@ public class CloseOrOpenServlet extends HttpServlet {
 			//获取response的输出流，相应前端页面的请求
 			BufferedWriter writer = new BufferedWriter(response.getWriter());
 			writer.write(""+result);
-
-
-
-
-
 			writer.flush();
 			writer.close();
-			
 		}
 		
 		if(flag.equals("false")) {

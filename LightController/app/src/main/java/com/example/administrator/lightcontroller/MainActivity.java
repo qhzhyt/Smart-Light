@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private void initScoket(){
         try {
-            socket = new Socket("192.168.137.1", 8888);
+            socket = new Socket("192.168.43.233", 8888);
             new Thread() {
                 @Override
                 public void run() {
