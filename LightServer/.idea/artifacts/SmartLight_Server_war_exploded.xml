@@ -1,0 +1,13 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="SmartLight-Server:war exploded">
+    <output-path>$PROJECT_DIR$/out/artifacts/SmartLight_Server_war_exploded</output-path>
+    <root id="root">
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="LightServer" />
+        </element>
+      </element>
+      <element id="javaee-facet-resources" facet="LightServer/web/Web" />
+    </root>
+  </artifact>
+</component>
