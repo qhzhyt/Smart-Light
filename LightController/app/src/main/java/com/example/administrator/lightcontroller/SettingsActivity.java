@@ -1,24 +1,13 @@
 package com.example.administrator.lightcontroller;
 
-import android.annotation.TargetApi;
-import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.preference.*;
+import android.preference.EditTextPreference;
+import android.preference.PreferenceActivity;
+import android.preference.PreferenceFragment;
 import android.support.annotation.Nullable;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
-import android.view.MenuItem;
-
-import java.util.List;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -47,6 +36,7 @@ public class SettingsActivity extends AppCompatActivity {
     private void initView() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
     }
 
@@ -56,6 +46,7 @@ public class SettingsActivity extends AppCompatActivity {
         //private IconPreference color;
 
         private EditTextPreference etpServerHost;
+        private EditTextPreference etpSitePath;
 
         public static GeneralPreferenceFragment newInstance() {
             return new GeneralPreferenceFragment();
@@ -66,8 +57,13 @@ public class SettingsActivity extends AppCompatActivity {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.pref_general);
             etpServerHost=(EditTextPreference)findPreference("server_host");
+            etpSitePath=(EditTextPreference)findPreference("site_path");
+
             if (!etpServerHost.getText().equals(""))
                 etpServerHost.setSummary(etpServerHost.getText());
+
+            if (!etpSitePath.getText().equals(""))
+                etpSitePath.setSummary(etpSitePath.getText());
 
         }
 

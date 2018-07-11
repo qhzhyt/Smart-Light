@@ -1,29 +1,44 @@
 package com.example.administrator.lightcontroller;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraManager;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
+import com.example.administrator.lightcontroller.util.RequestManager;
+import com.example.administrator.lightcontroller.util.Utils;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
+
+    private String serverIp;
+    private int serverPort;
+    private String serverHost;
+    private TextView tvServer;
+    private String sitePath;
     private CameraManager manager;
     private Camera camera = null;
     private Camera.Parameters parameters = null;
@@ -32,118 +47,171 @@ public class MainActivity extends AppCompatActivity {
     private Socket socket;
     private InputStreamReader reader;
     private boolean flag = true;
+    private LinearLayout container;
+
+    private String macAddr;
+
+    private boolean isRunning=false;
+
+
+    private Thread connectThread;
+
+    private int luminance = 0;
 
     //Android UI
-    private Handler handler = new Handler(){
+    @SuppressLint("HandlerLeak")
+    private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            switch (msg.what){
+            switch (msg.what) {
                 case 1:
-                    setColorAndLight(R.color.lightslategray,51);
+                    setColorAndLight(R.color.lightslategray, 51);
                     break;
                 case 2:
-                    setColorAndLight(R.color.saddlebrown,102);
+                    setColorAndLight(R.color.saddlebrown, 102);
                     break;
                 case 3:
-                    setColorAndLight(R.color.darkred,153);
+                    setColorAndLight(R.color.darkred, 153);
                     break;
                 case 4:
-                    setColorAndLight(R.color.mediumvioletred,205);
+                    setColorAndLight(R.color.mediumvioletred, 205);
                     break;
                 case 5:
-                    setColorAndLight(R.color.crimson,255);
+                    setColorAndLight(R.color.crimson, 255);
                     break;
                 default:
                     break;
-
             }
         }
     };
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_index);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
+        //tvServer = findViewById(R.id.container);
 
-     /*   Resources res = getResources();
-        Drawable drawable = res.getDrawable(R.color.colorAccent);
-        this.getWindow().setBackgroundDrawable(drawable);*/
+        container = findViewById(R.id.container);
 
         manager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
-        new Thread(){
+
+        getApplicationContext();
+        //WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+        macAddr = Utils.getMacAddress(getApplicationContext());//wm.getConnectionInfo().getMacAddress();
+
+        connectThread = new Thread() {
             @Override
             public void run() {
-                super.run();
-                initScoket();
+                postLightInfo();
             }
-        }.start();
+        };
+    }
+
+
+    private void postLightInfo() {
+
+        HashMap<String, String> form = new HashMap<>();
+        form.put("lightPhoneId", macAddr);
+
+        while (isRunning) {
+            RequestManager requestManager = RequestManager.getInstance(MainActivity.this);
+            requestManager.requestAsyn("SingleLightBeanServlet", RequestManager.TYPE_GET, form, new RequestManager.ReqCallBack<String>() {
+                @Override
+                public void onReqSuccess(String result) {
+                    JSONObject jsonObject = null;
+                    try {
+                        jsonObject = new JSONObject(result);
+                        //String tLevel=jsonObject.getString("")
+                        setTitle(serverHost + "(已连接)");
+                        int level = jsonObject.getInt("luminance");
+
+                        Message msg = new Message();
+                        msg.what = level;
+                        handler.sendMessage(msg);
+
+                        boolean state=jsonObject.getBoolean("state");
+
+                        closeORopen(state);
+
+
+                    } catch (JSONException e) {
+
+                        e.printStackTrace();
+                        setTitle(serverHost + "(未连接)");
+
+                    }
+
+
+                }
+
+                @Override
+                public void onReqFailed(String errorMsg) {
+                    setTitle(serverHost + "(未连接)");
+                }
+
+            });
+
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    private void setColorAndLight(int colorId, int level) {
+        // 设备屏幕背景色
+        container.setBackgroundColor(getResources().getColor(colorId));
+        //设置屏幕亮度
+        setLight(MainActivity.this, level);
 
     }
 
     /**
-     * Android4.0之后的新特性
-     * 网络连接部分必须要放在子线程中不能再主线程中执行
+     * 设备屏幕背景色
      *
+     * @param colorId
      */
-    private void initScoket(){
-        try {
-            socket = new Socket("192.168.43.2", 8888);
-            new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        reader = new InputStreamReader(socket.getInputStream());
-                        char[] datas = new char[1024];
-                        int length = reader.read(datas);
-                        while(length != -1 && flag) {
-                            String readStr = new String(datas, 0, length);
-                            if(readStr.equals("10")){
-                                closeORopen(true);
-                            }else if(readStr.equals("11")){
-                                closeORopen(false);
-                            }
-
-                            int leval = Integer.parseInt(readStr);
-                            Message msg = new Message();
-                            msg.what = leval;
-                            handler.sendMessage(msg);
-                            //setColorAndLight(R.color.lightslategray,51);
+    private void setColor(int colorId) {
+        Resources res = getResources();
+        Drawable drawable = res.getDrawable(colorId);
+        this.getWindow().setBackgroundDrawable(drawable);
+    }
 
 
-                            //System.out.println(readStr);
-                            Log.e("CMD",readStr);
-                            length = reader.read(datas);
-                        }
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                };
-            }.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    /**
+     * 设置屏幕亮度
+     *
+     * @param context
+     * @param level
+     */
+    private void setLight(Activity context, int level) {
+        WindowManager.LayoutParams lp = context.getWindow().getAttributes();
+        lp.screenBrightness = Float.valueOf(level) * (1f / 255f);
+        context.getWindow().setAttributes(lp);
     }
 
     private void closeORopen(boolean isChecked) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { //android6.0调用的手电筒接口
             try {
                 manager.setTorchMode("0", isChecked);
-            }catch(CameraAccessException e){
+            } catch (CameraAccessException e) {
                 e.printStackTrace();
             }
-        }else{
+        } else {
             //低于6.0系统的手电筒
-            if (isChecked){
+            if (isChecked) {
                 camera = Camera.open();
                 parameters = camera.getParameters();
                 parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);// 开启
                 camera.setParameters(parameters);
                 camera.startPreview();
-            }else{
+            } else {
                 parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);// 关闭
                 camera.setParameters(parameters);
                 camera.stopPreview();
@@ -155,53 +223,84 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        //让线程停止
+    protected void onResume() {
+        super.onResume();
+        initData();
+        if (connectThread!=null&&!connectThread.isAlive()){
+            isRunning=true;
+            connectThread.start();
+        }
+    }
+
+    /**
+     * Android4.0之后的新特性
+     * 网络连接部分必须要放在子线程中不能再主线程中执行
+     */
+
+    /*private void initScoket() {
         try {
-            reader.close();
+            socket = new Socket(serverIp, serverPort);
+            new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        reader = new InputStreamReader(socket.getInputStream());
+                        char[] datas = new char[1024];
+                        int length = reader.read(datas);
+
+                        while (length != -1 && flag) {
+                            if (datas[0]==0xff){
+                                length = reader.read(datas);
+                                continue;
+                            }
+                            String readStr = new String(datas, 0, length);
+                            if (readStr.equals("10")) {
+                                closeORopen(true);
+                            } else if (readStr.equals("11")) {
+                                closeORopen(false);
+                            }
+
+                            int leval = Integer.parseInt(readStr);
+                            Message msg = new Message();
+                            msg.what = leval;
+                            handler.sendMessage(msg);
+                            //setColorAndLight(R.color.lightslategray,51);
+
+
+                            //System.out.println(readStr);
+                            Log.e("CMD", readStr);
+                            length = reader.read(datas);
+                        }
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+
+            }.start();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }*/
+    private void initData() {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        serverHost = sp.getString("server_host", "192.168.43.1:8888");
+        sitePath = sp.getString("site_path","mySitePath");
 
-        flag = false;
+        //serverIp = temps[0];
+
+        /*if (temps.length > 1) {
+            serverPort = Integer.parseInt(temps[1]);
+        }*/
+
+        RequestManager.BASE_URL = "http://" + serverHost + "/" + sitePath;
+
+        //tvServer.setText(serverIp+":"+serverPort);
+        setTitle(serverHost + "(未连接)");
+
+        //connectThread.stop();
     }
-
-
-    private void setColorAndLight(int colorId,int level){
-        // 设备屏幕背景色
-        setColor(colorId);
-        //设置屏幕亮度
-        setLight(MainActivity.this,level);
-
-    }
-
-    /**
-     * 设备屏幕背景色
-     * @param colorId
-     */
-    private void setColor(int colorId){
-
-        Resources res = getResources();
-        Drawable drawable = res.getDrawable(colorId);
-        this.getWindow().setBackgroundDrawable(drawable);
-
-    }
-
-
-    /**
-     * 设置屏幕亮度
-     * @param context
-     * @param level
-     */
-    private void setLight(Activity context, int level) {
-        WindowManager.LayoutParams lp = context.getWindow().getAttributes();
-        lp.screenBrightness = Float.valueOf(level) * (1f / 255f);
-        context.getWindow().setAttributes(lp);
-    }
-
     /**
      * 重写activity 中创建菜单的选项
      *
@@ -227,11 +326,19 @@ public class MainActivity extends AppCompatActivity {
 
         switch (item.getItemId()) {
             case R.id.menu_connect:
-                Toast.makeText(this, "add", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "connecting......", Toast.LENGTH_SHORT).show();
+                isRunning=true;
+                connectThread.start();
+                setTitle(serverHost + "(正在连接)");
                 break;
             case R.id.menu_setting:
-                Intent intent=new Intent(this,SettingsActivity.class);
+                Intent intent = new Intent(this, SettingsActivity.class);
                 startActivity(intent);
+                break;
+            case R.id.menu_disconnect:
+                isRunning=false;
+                setTitle(serverHost + "(已断开)");
+                //connectThread.stop();
                 break;
         }
 

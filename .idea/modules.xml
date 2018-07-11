@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/LightController.iml" filepath="$PROJECT_DIR$/.idea/modules/LightController.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/LightServer.iml" filepath="$PROJECT_DIR$/.idea/modules/LightServer.iml" />
       <module fileurl="file://$PROJECT_DIR$/LightController/app/app.iml" filepath="$PROJECT_DIR$/LightController/app/app.iml" />
     </modules>
   </component>

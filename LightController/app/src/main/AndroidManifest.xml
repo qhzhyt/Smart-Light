@@ -16,16 +16,16 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainBakActivity">
 
         </activity>
         <activity
                 android:name=".SettingsActivity"
-                android:label="@string/title_activity_settings">
+                android:label="@string/title_activity_settings"
+                android:parentActivityName=".MainActivity">
         </activity>
         <activity
-                android:name=".IndexActivity"
-                android:label="@string/title_activity_index"
+                android:name=".MainActivity"
                 android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
