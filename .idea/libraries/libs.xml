@@ -1,0 +1,24 @@
+<component name="libraryTable">
+  <library name="libs">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/LightServer/lib/commons-beanutils-1.7.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/LightServer/lib/commons-collections-3.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/LightServer/lib/commons-lang-2.5.jar!/" />
+      <root url="jar://$PROJECT_DIR$/LightServer/lib/commons-logging.jar!/" />
+      <root url="jar://$PROJECT_DIR$/LightServer/lib/ezmorph-1.0.3.jar!/" />
+      <root url="jar://$PROJECT_DIR$/LightServer/lib/javax.annotation.jar!/" />
+      <root url="jar://$PROJECT_DIR$/LightServer/lib/javax.ejb.jar!/" />
+      <root url="jar://$PROJECT_DIR$/LightServer/lib/javax.jms.jar!/" />
+      <root url="jar://$PROJECT_DIR$/LightServer/lib/javax.persistence.jar!/" />
+      <root url="jar://$PROJECT_DIR$/LightServer/lib/javax.resource.jar!/" />
+      <root url="jar://$PROJECT_DIR$/LightServer/lib/javax.servlet.jar!/" />
+      <root url="jar://$PROJECT_DIR$/LightServer/lib/javax.servlet.jsp.jar!/" />
+      <root url="jar://$PROJECT_DIR$/LightServer/lib/javax.servlet.jsp.jstl.jar!/" />
+      <root url="jar://$PROJECT_DIR$/LightServer/lib/javax.transaction.jar!/" />
+      <root url="jar://$PROJECT_DIR$/LightServer/lib/json-lib-2.4-jdk15.jar!/" />
+      <root url="jar://D:/Program Files/apache-tomcat-7.0.85/lib/websocket-api.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

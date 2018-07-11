@@ -1,8 +1,8 @@
 package com.example.administrator.lightcontroller;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
@@ -14,11 +14,13 @@ import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.net.Socket;
 
 public class MainActivity extends AppCompatActivity {
@@ -88,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private void initScoket(){
         try {
-            socket = new Socket("192.168.43.233", 8888);
+            socket = new Socket("192.168.43.2", 8888);
             new Thread() {
                 @Override
                 public void run() {
@@ -199,4 +201,41 @@ public class MainActivity extends AppCompatActivity {
         lp.screenBrightness = Float.valueOf(level) * (1f / 255f);
         context.getWindow().setAttributes(lp);
     }
+
+    /**
+     * 重写activity 中创建菜单的选项
+     *
+     * @return 返回真假决定是否显示
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        //通过inflater对象将自己写的资源文件转换成menu对象
+        //参数1代表需要创建的菜单，参数2代表将菜单设置到对应的menu上
+        getMenuInflater().inflate(R.menu.main, menu);
+
+        return true;
+    }
+
+    /**
+     * 重写activity 中菜单选中事件
+     *
+     * @return 返回真假，对实现效果没有影响。
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case R.id.menu_connect:
+                Toast.makeText(this, "add", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.menu_setting:
+                Intent intent=new Intent(this,SettingsActivity.class);
+                startActivity(intent);
+                break;
+        }
+
+        return false;
+    }
+
 }
